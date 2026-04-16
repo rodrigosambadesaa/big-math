@@ -17,3 +17,8 @@ dependencies {
 	//compile group: 'ch.obermuhlner', name: 'big-math', version: '2.3.3'
 	compile project(':ch.obermuhlner.math.big')
 }
+
+task runCalculator(type: JavaExec) {
+	main = 'ch.obermuhlner.math.big.example.BigMathCalculatorApp'
+	classpath = sourceSets.main.runtimeClasspath
+}

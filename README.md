@@ -15,6 +15,39 @@ Advanced Java `BigDecimal` math functions (`pow`, `sqrt`, `log`, `sin`, ...) usi
 
 See also the official [Big-Math Documentation](http://eobermuhlner.github.io/big-math/).
 
+## Graphical Calculator
+
+The example module now includes a full desktop calculator UI based on Swing.
+
+Features:
+* Arbitrary precision with configurable digits
+* Real and complex mode
+* Expression parser with operators `+`, `-`, `*`, `/`, `^`, `!`
+* Functions like `sin`, `cos`, `tan`, `exp`, `log`, `sqrt`, `gamma`, `factorial`, `pow`, `root`, `atan2`
+* Complex helpers like `abs`, `arg`, `conj`, `re`, `im`
+* Constants `pi`, `e`, `i`, `ans`
+* Implicit multiplication (`2pi`, `3i`, `(1+i)(2-i)`)
+
+### Running the GUI Calculator
+
+Prerequisites:
+* Java 8+ installed and available on `PATH`
+* Use the Gradle wrapper included in this repository
+
+From the repository root, run:
+
+Linux/macOS:
+```bash
+./gradlew :ch.obermuhlner.math.big.example:runCalculator
+```
+
+Windows (PowerShell or cmd):
+```bash
+gradlew.bat :ch.obermuhlner.math.big.example:runCalculator
+```
+
+If everything is set up correctly, a desktop window titled `Big-Math Calculator` will open.
+
 ## BigDecimalMath
 
 The class `BigDecimalMath` provides efficient and accurate implementations for:
