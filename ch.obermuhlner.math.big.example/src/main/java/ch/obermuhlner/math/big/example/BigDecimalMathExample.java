@@ -1,15 +1,222 @@
 package ch.obermuhlner.math.big.example;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.Locale;
 
+import ch.obermuhlner.math.big.BigComplex;
 import ch.obermuhlner.math.big.BigDecimalMath;
 
 public class BigDecimalMathExample {
 
-	public static void main(String[] args) {
-		exampleForDocu();
+	private static final int DEFAULT_PRECISION = 50;
 
+	public static void main(String[] args) throws IOException {
+		if (args.length > 0) {
+			runArgumentMode(args);
+			return;
+		}
+
+		runInteractiveConsole();
+	}
+
+	private static void runArgumentMode(String[] args) throws IOException {
+		String command = args[0].trim().toLowerCase(Locale.ROOT);
+		if ("gui".equals(command)) {
+			launchGui();
+			return;
+		}
+		if ("demo".equals(command) || "docu".equals(command)) {
+			runDemo();
+			return;
+		}
+		if ("calc".equals(command) || "console".equals(command)) {
+			runCalculatorMode(new BufferedReader(new InputStreamReader(System.in)), true);
+			return;
+		}
+
+		System.out.println("Argumento no reconocido: " + args[0]);
+		printMainHelp();
+	}
+
+	private static void runInteractiveConsole() throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Big-Math console");
+		System.out.println("Escribe `gui` en cualquier momento para abrir la interfaz grafica.");
+		printMainHelp();
+
+		while (true) {
+			System.out.print("\nmodo> ");
+			String line = reader.readLine();
+			if (line == null) {
+				System.out.println();
+				return;
+			}
+
+			String command = line.trim();
+			if (command.isEmpty()) {
+				continue;
+			}
+			if (handleGlobalCommand(command)) {
+				if (isExitCommand(command)) {
+					return;
+				}
+				continue;
+			}
+
+			String normalized = command.toLowerCase(Locale.ROOT);
+			if ("1".equals(normalized) || "calc".equals(normalized) || "calculadora".equals(normalized)) {
+				runCalculatorMode(reader, false);
+				continue;
+			}
+			if ("2".equals(normalized) || "demo".equals(normalized) || "ejemplos".equals(normalized)) {
+				runDemo();
+				continue;
+			}
+
+			System.out.println("Comando no reconocido: " + command);
+			printMainHelp();
+		}
+	}
+
+	private static void runCalculatorMode(BufferedReader reader, boolean standalone) throws IOException {
+		BigComplex lastResult = BigComplex.ZERO;
+		int precision = DEFAULT_PRECISION;
+		boolean realMode = false;
+
+		System.out.println("\nCalculadora de consola");
+		System.out.println("Expresiones soportadas como en la GUI. Comandos: `gui`, `back`, `exit`, `help`, `precision 80`, `mode real`, `mode complex`.");
+
+		while (true) {
+			System.out.print("calc[" + (realMode ? "real" : "complex") + "," + precision + "]> ");
+			String line = reader.readLine();
+			if (line == null) {
+				System.out.println();
+				return;
+			}
+
+			String command = line.trim();
+			if (command.isEmpty()) {
+				continue;
+			}
+			if (handleGlobalCommand(command)) {
+				if (isExitCommand(command)) {
+					return;
+				}
+				continue;
+			}
+
+			String normalized = command.toLowerCase(Locale.ROOT);
+			if ("back".equals(normalized)) {
+				if (standalone) {
+					return;
+				}
+				break;
+			}
+			if ("help".equals(normalized) || "ayuda".equals(normalized)) {
+				printCalculatorHelp();
+				continue;
+			}
+			if ("ans".equalsIgnoreCase(command)) {
+				System.out.println("ans = " + BigMathCalculatorApp.formatForConsole(lastResult));
+				continue;
+			}
+			if (normalized.startsWith("precision ")) {
+				Integer parsedPrecision = parsePrecision(command.substring("precision ".length()).trim());
+				if (parsedPrecision != null) {
+					precision = parsedPrecision.intValue();
+					System.out.println("Precision actualizada a " + precision + " digitos.");
+				}
+				continue;
+			}
+			if ("mode real".equals(normalized) || "modo real".equals(normalized)) {
+				realMode = true;
+				System.out.println("Modo cambiado a real.");
+				continue;
+			}
+			if ("mode complex".equals(normalized) || "modo complejo".equals(normalized) || "mode complejo".equals(normalized)) {
+				realMode = false;
+				System.out.println("Modo cambiado a complejo.");
+				continue;
+			}
+
+			try {
+				BigComplex result = BigMathCalculatorApp.evaluateInConsole(command, precision, realMode, lastResult);
+				lastResult = result;
+				System.out.println(BigMathCalculatorApp.formatForConsole(result));
+			} catch (RuntimeException ex) {
+				System.out.println("Error: " + ex.getMessage());
+			}
+		}
+	}
+
+	private static boolean handleGlobalCommand(String command) {
+		String normalized = command.trim().toLowerCase(Locale.ROOT);
+		if ("gui".equals(normalized)) {
+			launchGui();
+			return true;
+		}
+		if ("help".equals(normalized) || "ayuda".equals(normalized)) {
+			printMainHelp();
+			return true;
+		}
+		if (isExitCommand(normalized)) {
+			System.out.println("Cerrando consola.");
+			return true;
+		}
+		return false;
+	}
+
+	private static boolean isExitCommand(String command) {
+		String normalized = command.trim().toLowerCase(Locale.ROOT);
+		return "exit".equals(normalized) || "quit".equals(normalized) || "salir".equals(normalized);
+	}
+
+	private static Integer parsePrecision(String raw) {
+		try {
+			int value = Integer.parseInt(raw);
+			if (value < 5) {
+				System.out.println("La precision minima es 5.");
+				return null;
+			}
+			return Integer.valueOf(value);
+		} catch (NumberFormatException ex) {
+			System.out.println("Precision invalida: " + raw);
+			return null;
+		}
+	}
+
+	private static void launchGui() {
+		System.out.println("Abriendo interfaz grafica...");
+		BigMathCalculatorApp.launch();
+	}
+
+	private static void printMainHelp() {
+		System.out.println("Opciones:");
+		System.out.println("  1 | calc        -> abrir calculadora de consola");
+		System.out.println("  2 | demo        -> mostrar ejemplos de documentacion");
+		System.out.println("  gui             -> lanzar la interfaz grafica");
+		System.out.println("  help            -> mostrar esta ayuda");
+		System.out.println("  exit            -> salir");
+	}
+
+	private static void printCalculatorHelp() {
+		System.out.println("Comandos de calculadora:");
+		System.out.println("  gui             -> abrir la interfaz grafica");
+		System.out.println("  precision N     -> cambiar precision");
+		System.out.println("  mode real       -> solo resultados reales");
+		System.out.println("  mode complex    -> permitir resultados complejos");
+		System.out.println("  ans             -> mostrar el ultimo resultado");
+		System.out.println("  back            -> volver al menu principal");
+		System.out.println("  exit            -> salir");
+	}
+
+	private static void runDemo() {
+		exampleForDocu();
+		System.out.println();
 		exampleForJavaDoc_roundTrailingZeroes();
 	}
 

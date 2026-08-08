@@ -23,10 +23,11 @@ Features:
 * Arbitrary precision with configurable digits
 * Real and complex mode
 * Expression parser with operators `+`, `-`, `*`, `/`, `^`, `!`
-* Functions like `sin`, `cos`, `tan`, `exp`, `log`, `sqrt`, `gamma`, `factorial`, `pow`, `root`, `atan2`
-* Complex helpers like `abs`, `arg`, `conj`, `re`, `im`
+* Extended functions like `sin`, `cos`, `tan`, `cot`, `asin`, `acos`, `atan`, `acot`, `sinh`, `cosh`, `tanh`, `coth`, `asinh`, `acosh`, `atanh`, `acoth`, `exp`, `log`, `log2`, `log10`, `sqrt`, `gamma`, `factorial`, `bernoulli`, `pow`, `root`, `atan2`
+* Numeric helpers like `recip`, `abs`, `abs2`, `arg`, `conj`, `re`, `im`, `mantissa`, `exponent`, `sigdigits`, `int`, `frac`, `isint`, `islong`, `isdouble`, `deg`, `rad`
 * Constants `pi`, `e`, `i`, `ans`
 * Implicit multiplication (`2pi`, `3i`, `(1+i)(2-i)`)
+* GUI tools for algebra, equations, inequalities, 2D/3D graphing, discrete math, graph paths, recurrences, numerical calculus, matrices, statistics, geometry, and exact rational arithmetic
 
 ### Running the GUI Calculator
 
@@ -47,6 +48,44 @@ gradlew.bat :ch.obermuhlner.math.big.example:runCalculator
 ```
 
 If everything is set up correctly, a desktop window titled `Big-Math Calculator` will open.
+
+### Running the Console Modes
+
+The default example entry point now starts an interactive console launcher with:
+
+* `calc` for the text calculator
+* `demo` for the documentation examples
+* `gui` to open the Swing interface at any time
+
+Run it with:
+
+Linux/macOS:
+```bash
+./gradlew :ch.obermuhlner.math.big.example:run
+```
+
+Windows (PowerShell or cmd):
+```bash
+gradlew.bat :ch.obermuhlner.math.big.example:run
+```
+
+Inside the console launcher and the calculator mode, typing `gui` opens the graphical interface without restarting the program.
+
+### Running the GUI with Docker
+
+This repository now includes a browser-accessible desktop container for the calculator UI.
+
+Build and run:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+* `http://localhost:8080/vnc.html`
+
+The container starts the Swing application inside an Xvfb desktop and exposes it through noVNC.
 
 ## BigDecimalMath
 
@@ -566,12 +605,48 @@ The big-math Jar file is also OSGi compatible.
 
 The `MANIFEST.MF` contains all the necessary headers and exports the public packages:
 - `ch.obermuhlner.math.big`
+- `ch.obermuhlner.math.big.algebra`
+- `ch.obermuhlner.math.big.calculus`
+- `ch.obermuhlner.math.big.graph`
+- `ch.obermuhlner.math.big.matrix`
+- `ch.obermuhlner.math.big.statistics`
 - `ch.obermuhlner.math.big.stream`
 
 ### Usage in Kotlin
 
 If you want to use big-math library in Kotlin you may do so directly, or you use the 
 [kotlin-big-math](https://github.com/eobermuhlner/kotlin-big-math) library that provides additional features, like operators.
+
+
+## Algebra, matrices and tensors
+
+The algebra API lets the same immutable `Matrix<T>` and `Polynomial<T>` algorithms operate on
+`BigDecimal`, `BigRational`, `BigComplex`, finite-field values, or exact symbolic `Expression`
+objects. Values are never converted to `double`.
+
+```java
+Expression x = Expression.variable("x");
+Matrix<Expression> matrix = new Matrix<>(ExpressionField.INSTANCE, new Expression[][] {
+    {x, Expression.constant(2)},
+    {Expression.constant(1), Expression.constant(2)}
+});
+
+Expression determinant = matrix.determinant(); // 2*x - 2
+```
+
+The matrix API includes immutable construction and slicing, arithmetic, Hadamard/Kronecker
+products, adjoints, exact determinants, cofactors, inverses, RREF, rank/nullity, systems,
+least squares, LUP, characteristic polynomials, Cayley-Hamilton checks and structural predicates.
+`BigDecimalMatrixMath` adds norms, condition numbers, Cholesky, reduced QR and power iteration.
+`Tensor3<T>` provides generic rank-3 slicing, axis permutation, unfolding, mode products,
+layer products and direct 3-D convolution.
+
+See [the algebra and matrix guide](docs/markdown/algebra-matrices.md) for the comparison,
+supported fields and examples. Additional modules provide exact integer combinatorics/number
+theory (`BigIntegerMath`), descriptive statistics/regression (`BigDecimalStatistics`) and
+high-precision numerical calculus/ODE integration (`BigDecimalCalculus`).
+`Graph` adds immutable directed/undirected graphs, traversals, shortest paths, closure,
+components, topological sorting, cycle detection and generic adjacency/Laplacian/walk matrices.
 
 
 ## Using big-math in your projects

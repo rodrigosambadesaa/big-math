@@ -67,7 +67,7 @@ jar {
                 "Bundle-Name": archivesBaseName,
                 "Bundle-SymbolicName": moduleName,
                 "Bundle-Version": version,
-                "Export-Package": "ch.obermuhlner.math.big, ch.obermuhlner.math.big.stream")
+                "Export-Package": "ch.obermuhlner.math.big, ch.obermuhlner.math.big.algebra, ch.obermuhlner.math.big.calculus, ch.obermuhlner.math.big.graph, ch.obermuhlner.math.big.matrix, ch.obermuhlner.math.big.statistics, ch.obermuhlner.math.big.stream")
     }
 }
 

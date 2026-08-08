@@ -1,0 +1,10 @@
+services:
+  big-math:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "5900:5900"
+    environment:
+      XVFB_WHD: 1600x900x24
